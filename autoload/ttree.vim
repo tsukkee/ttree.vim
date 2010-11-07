@@ -50,6 +50,18 @@ function! ttree#show(...)
     call s:key_mapping()
 endfunction
 
+function! ttree#hide()
+    call t:ttree.hide()
+endfunction
+
+function! ttree#toggle()
+    if exists('t:ttree') && t:ttree.is_shown()
+        call ttree#hide()
+    else
+        call ttree#show()
+    endif
+endfunction
+
 function! ttree#get_node(lnum)
     if !exists('t:ttree')
         return s:EMPTY
@@ -170,14 +182,6 @@ function! s:Ttree.hide()
         execute bufwinnr(self.bufnr) 'wincmd w'
         close
         wincmd p
-    endif
-endfunction
-
-function! s:Ttree.toggle()
-    if !self.is_shown()
-        call self.show()
-    else
-        call self.hide()
     endif
 endfunction
 
