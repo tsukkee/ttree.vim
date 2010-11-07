@@ -66,12 +66,20 @@ function! ttree#toggle()
     endif
 endfunction
 
-function! ttree#get_node(lnum)
+function! ttree#get_node(...)
     if !exists('t:ttree')
         return s:EMPTY
     endif
 
-    let index = a:lnum - 1 - s:OFFSET
+    if a:0 > 1
+        throw s:EXCEPTION_NAME . 'Too many arguments'
+    elseif a:0 == 1 && type(a:1) == type(0)
+        let lnum = a:1
+    else
+        let lnum = line('.')
+    endif
+
+    let index = lnum - 1 - s:OFFSET
     return (0 <= index && index < len(t:ttree.line2node))
     \   ? t:ttree.line2node[index]
     \   : s:EMPTY

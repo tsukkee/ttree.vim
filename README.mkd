@@ -37,5 +37,7 @@ Otherwise, the view is opened with current directory</dd>
 
 ## Todo
 * Enable to choose sorting method
+* Manipulate drive letters in Windows
 * More intelligent view splitting and closing
+* More actions
 * Etc...
