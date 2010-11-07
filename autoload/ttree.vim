@@ -10,6 +10,7 @@ endfunction
 call s:define('EXCEPTION_NAME', 'ttree: ')
 call s:define('BUFFER_NAME', 'ttree')
 call s:define('FILE_NODE_MARKER', '-')
+call s:define('DIR_SEPARATOR', '/')
 call s:define('CLOSE_DIR_MARKER', '+')
 call s:define('OPEN_DIR_MARKER', '~')
 call s:define('UPPER', '../')
@@ -27,6 +28,7 @@ endfunction
 call s:set_default('g:ttree_use_default_mappings', 1)
 call s:set_default('g:ttree_width', 25)
 call s:set_default('g:ttree_overwrite_statueline', 1)
+call s:set_default('g:wont_open_dir_names', ['.git', '.hg', '.svn', '.bzr', 'CVS'])
 " }}}
 
 " Interface {{{
@@ -136,6 +138,7 @@ function! s:rebase(lnum)
     let node = ttree#get_node(a:lnum)
     if !empty(node) && node.is_dir
         call ttree#show(node.path)
+        2
     endif
 endfunction
 
@@ -149,7 +152,7 @@ endfunction
 function! s:_rec_open(node)
     call a:node.open()
     for node in a:node.children
-        if node.is_dir
+        if node.is_dir && !node.wont_open
             call s:_rec_open(node)
         endif
     endfor
@@ -340,12 +343,14 @@ endfunction
 " DirNode {{{
 let s:DirNode = deepcopy(s:Node)
 let s:DirNode.is_dir = 1
+let s:DirNode.wont_open = 0
 let s:DirNode.is_opened = 0
 let s:DirNode.has_cached = 0
 let s:DirNode.children = []
 
 function! s:DirNode.initialize()
-    let self.name = fnamemodify(self.path[:-2], ':t') . '/'
+    let self.name = fnamemodify(self.path[:-2], ':t')
+    let self.wont_open = !empty(filter(copy(g:wont_open_dir_names), 'self.name ==# v:val'))
 endfunction
 
 function! s:DirNode.render(state)
@@ -353,7 +358,7 @@ function! s:DirNode.render(state)
 
     if self.is_opened
         call add(a:state.lines,
-        \   s:space(a:state.indent) . s:OPEN_DIR_MARKER . self.name)
+        \   s:space(a:state.indent) . s:OPEN_DIR_MARKER . self.name . s:DIR_SEPARATOR)
 
         let a:state.indent += 1
         for node in self.children
@@ -366,7 +371,7 @@ function! s:DirNode.render(state)
         let a:state.indent -= 1
     else
         call add(a:state.lines,
-        \   s:space(a:state.indent) . s:CLOSE_DIR_MARKER . self.name)
+        \   s:space(a:state.indent) . s:CLOSE_DIR_MARKER . self.name . s:DIR_SEPARATOR)
     endif
 endfunction
 
