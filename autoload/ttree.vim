@@ -18,9 +18,15 @@ call s:define('EMPTY', {})
 " }}}
 
 " Customize {{{
-" TODO: use global variables
-let s:width = 25
-let s:overwrite_status_line = 1
+function! s:set_default(variable_name, default)
+    if !exists(a:variable_name)
+        let {a:variable_name} = a:default
+    endif
+endfunction
+
+call s:set_default('g:ttree_use_default_mappings', 1)
+call s:set_default('g:ttree_width', 25)
+call s:set_default('g:ttree_overwrite_statueline', 1)
 " }}}
 
 " Interface {{{
@@ -107,7 +113,14 @@ function! s:open_node(lnum)
     if has_key(node, 'is_upper')
         call ttree#show(node.path)
     elseif !empty(node)
-        wincmd p
+        " move to last window
+        if winnr('#') != winnr()
+            wincmd p
+        " when there is only ttree buffer, preserve ttree window
+        else
+            let w = winwidth(winnr()) - g:ttree_width
+            execute 'botright' w 'vnew'
+        endif
         execute 'edit' fnameescape(node.path)
     endif
 endfunction
@@ -132,19 +145,66 @@ function! s:reload()
     call t:ttree.render()
 endfunction
 
+" recursive open
+function! s:_rec_open(node)
+    call a:node.open()
+    for node in a:node.children
+        if node.is_dir
+            call s:_rec_open(node)
+        endif
+    endfor
+endfunction
+
+function! s:recursive_open(lnum)
+    let node = ttree#get_node(a:lnum)
+    if !node.is_dir
+        return
+    endif
+
+    call s:_rec_open(node)
+    call t:ttree.render()
+endfunction
+
+" recursive close
+function! s:_rec_close(node)
+    call a:node.close()
+    for node in a:node.children
+        if node.is_dir
+            call s:_rec_close(node)
+        endif
+    endfor
+endfunction
+
+function! s:recursive_close(lnum)
+    let node = ttree#get_node(a:lnum)
+    if !node.is_dir
+        return
+    endif
+
+    call s:_rec_close(node)
+    call t:ttree.render()
+endfunction
+
+
 " key mapping
 function! s:key_mapping()
     nnoremap <silent> <buffer> <Plug>(ttree:toggle_directory) :<C-u>call <SID>toggle_directory(line('.'))<CR>
+    nnoremap <silent> <buffer> <Plug>(ttree:recursive_open) :<C-u>call <SID>recursive_open(line('.'))<CR>
+    nnoremap <silent> <buffer> <Plug>(ttree:recursive_close) :<C-u>call <SID>recursive_close(line('.'))<CR>
     nnoremap <silent> <buffer> <Plug>(ttree:open) :<C-u>call <SID>open_node(line('.'))<CR>
     nnoremap <silent> <buffer> <Plug>(ttree:toggle_show_dotfiles) :<C-u>call <SID>toggle_show_dotfiles()<CR>
     nnoremap <silent> <buffer> <Plug>(ttree:rebase) :<C-u>call <SID>rebase(line('.'))<CR>
     nnoremap <silent> <buffer> <Plug>(ttree:reload) :<C-u>call <SID>reload()<CR>
 
-    nmap <buffer> o <Plug>(ttree:toggle_directory)
-    nmap <buffer> <CR> <Plug>(ttree:open)
-    nmap <buffer> I <Plug>(ttree:toggle_show_dotfiles)
-    nmap <buffer> C <Plug>(ttree:rebase)
-    nmap <buffer> R <Plug>(ttree:reload)
+    if g:ttree_use_default_mappings
+        nmap <buffer> o <Plug>(ttree:toggle_directory)
+        nmap <buffer> O <Plug>(ttree:recursive_open)
+        nmap <buffer> X <Plug>(ttree:recursive_close)
+        nmap <buffer> <CR> <Plug>(ttree:open)
+        nmap <buffer> I <Plug>(ttree:toggle_show_dotfiles)
+        nmap <buffer> C <Plug>(ttree:rebase)
+        nmap <buffer> R <Plug>(ttree:reload)
+    endif
 endfunction
 " }}}
 
@@ -154,7 +214,7 @@ let s:Ttree = {
 \   'bufnr': -1,
 \   'bufname': '',
 \   'show_dotfiles': 0,
-\   'width': s:width,
+\   'width': g:ttree_width,
 \   'line2node': []
 \}
 
@@ -186,7 +246,7 @@ function! s:Ttree.show()
         setlocal nowrap
         setlocal nonumber
 
-        if s:overwrite_status_line
+        if g:ttree_overwrite_statueline
             " TODO: reload
             let &l:statusline = 'ttree (' . t:ttree.root.path . ')'
         endif
