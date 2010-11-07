@@ -37,7 +37,7 @@ function! ttree#show(...)
     let resume = 0
     if a:0 > 1
         throw s:EXCEPTION_NAME . 'Too many arguments'
-    elseif a:0 == 1
+    elseif a:0 == 1 && !empty(a:1)
         let root_path = a:1
     elseif exists('t:ttree')
         let resume = 1
@@ -66,11 +66,11 @@ function! ttree#hide()
     call t:ttree.hide()
 endfunction
 
-function! ttree#toggle()
+function! ttree#toggle(...)
     if exists('t:ttree') && t:ttree.is_shown()
         call ttree#hide()
     else
-        call ttree#show()
+        call ttree#show(a:0 == 1 ? a:1 : '')
     endif
 endfunction
 
