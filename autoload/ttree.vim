@@ -98,6 +98,8 @@ endfunction
 
 " reload
 function! s:reload()
+    call t:ttree.reload()
+    call t:ttree.render()
 endfunction
 
 " key mapping
@@ -106,11 +108,13 @@ function! s:key_mapping()
     nnoremap <silent> <buffer> <Plug>(ttree:open) :<C-u>call <SID>open_node(line('.'))<CR>
     nnoremap <silent> <buffer> <Plug>(ttree:toggle_show_dotfiles) :<C-u>call <SID>toggle_show_dotfiles()<CR>
     nnoremap <silent> <buffer> <Plug>(ttree:rebase) :<C-u>call <SID>rebase(line('.'))<CR>
+    nnoremap <silent> <buffer> <Plug>(ttree:reload) :<C-u>call <SID>reload()<CR>
 
     nmap <buffer> o <Plug>(ttree:toggle_directory)
     nmap <buffer> <CR> <Plug>(ttree:open)
     nmap <buffer> I <Plug>(ttree:toggle_show_dotfiles)
     nmap <buffer> C <Plug>(ttree:rebase)
+    nmap <buffer> R <Plug>(ttree:reload)
 endfunction
 " }}}
 
@@ -193,6 +197,10 @@ function! s:Ttree.render()
     call setpos('.', pos_save)
     setlocal nomodifiable
 endfunction
+
+function! s:Ttree.reload()
+    call self.root.reload()
+endfunction
 " }}}
 
 " Node {{{
@@ -270,13 +278,46 @@ function! s:DirNode.render(state)
     endif
 endfunction
 
-function! s:DirNode.open()
-    if !self.has_cached
-        for path in split(glob(self.path . '{.*,*}'), "\n")
-            call add(self.children, s:NodeFactory(path))
+function! s:DirNode.cache(force)
+    if a:force || !self.has_cached
+        let children = split(glob(self.path . '{.*,*}'), "\n")
+
+        " delete non-existent node
+        let i = 0
+        for node in self.children
+            if index(children, node.path) == -1
+                call remove(self.children, i)
+            else
+                let i += 1
+            endif
+        endfor
+
+        " add new node
+        let i = 0
+        for path in children
+            if empty(filter(copy(self.children), 'v:val.path == path'))
+                call insert(self.children, s:NodeFactory(path), i)
+            endif
+            let i += 1
         endfor
         let self.has_cached = 1
     endif
+endfunction
+
+function! s:DirNode.reload()
+    if self.has_cached
+        call self.cache(1)
+    endif
+
+    for node in self.children
+        if node.is_dir
+            call node.reload()
+        endif
+    endfor
+endfunction
+
+function! s:DirNode.open()
+    call self.cache(0)
     let self.is_opened = 1
 endfunction
 

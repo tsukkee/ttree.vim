@@ -5,5 +5,4 @@ augroup tree_view
     autocmd!
 augroup END
 
-
 let &cpo = s:cpo_save
