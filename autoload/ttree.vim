@@ -6,9 +6,9 @@ endfunction
 
 call s:define('EXCEPTION_NAME', 'ttree: ')
 call s:define('BUFFER_NAME', 'ttree')
-call s:define('FILE_NODE_MARKER', '~')
-call s:define('CLOSE_DIR_MARKER', '-')
-call s:define('OPEN_DIR_MARKER', '+')
+call s:define('FILE_NODE_MARKER', '-')
+call s:define('CLOSE_DIR_MARKER', '+')
+call s:define('OPEN_DIR_MARKER', '~')
 call s:define('UPPER', '../')
 call s:define('OFFSET', 0)
 call s:define('EMPTY', {})
@@ -17,6 +17,7 @@ call s:define('EMPTY', {})
 " Customize {{{
 " TODO: use global variables
 let s:width = 25
+let s:overwrite_status_line = 1
 " }}}
 
 " Interface {{{
@@ -171,6 +172,15 @@ function! s:Ttree.show()
         setlocal nofoldenable
         setlocal foldcolumn=0
         setlocal nowrap
+        setlocal nonumber
+
+        if s:overwrite_status_line
+            " TODO: reload
+            let &l:statusline = 'ttree (' . t:ttree.root.path . ')'
+        endif
+
+        " fire FileType event for customization and hightlight
+        setfiletype ttree
     " buffer has already shown
     else
         execute bufwinnr(self.bufnr) 'wincmd w'
