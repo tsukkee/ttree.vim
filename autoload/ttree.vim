@@ -1,15 +1,21 @@
 " Constants {{{
-let s:EXCEPTION_NAME = 'ttree: '
-let s:BUFFER_NAME = 'ttree'
-let s:FILE_NODE_MARKER = '~'
-let s:CLOSE_DIR_MARKER = '-'
-let s:OPEN_DIR_MARKER = '+'
-let s:UPPER = '../'
-let s:OFFSET = 0
-let s:EMPTY = {}
+function! s:define(name, value)
+    let s:{a:name} = a:value
+    lockvar s:{a:name}
+endfunction
+
+call s:define('EXCEPTION_NAME', 'ttree: ')
+call s:define('BUFFER_NAME', 'ttree')
+call s:define('FILE_NODE_MARKER', '~')
+call s:define('CLOSE_DIR_MARKER', '-')
+call s:define('OPEN_DIR_MARKER', '+')
+call s:define('UPPER', '../')
+call s:define('OFFSET', 0)
+call s:define('EMPTY', {})
 " }}}
 
 " Customize {{{
+" TODO: use global variables
 let s:width = 25
 " }}}
 
