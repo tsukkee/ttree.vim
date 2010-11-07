@@ -341,12 +341,13 @@ endfunction
 " }}}
 
 " DirNode {{{
-let s:DirNode = deepcopy(s:Node)
-let s:DirNode.is_dir = 1
-let s:DirNode.wont_open = 0
-let s:DirNode.is_opened = 0
-let s:DirNode.has_cached = 0
-let s:DirNode.children = []
+let s:DirNode = extend(deepcopy(s:Node), {
+\   'is_dir': 1,
+\   'wont_open': 0,
+\   'is_opened': 0,
+\   'has_cached': 0,
+\   'children': []
+\})
 
 function! s:DirNode.initialize()
     let self.name = fnamemodify(self.path[:-2], ':t')
@@ -432,8 +433,9 @@ endfunction
 " }}}
 
 " UpperNode {{{
-let s:UpperNode = deepcopy(s:Node)
-let s:UpperNode.is_upper = 1
+let s:UpperNode = extend(deepcopy(s:Node), {
+\   'is_upper': 1
+\})
 
 function! s:UpperNode.initialize()
     let self.name = s:UPPER
