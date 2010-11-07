@@ -1,0 +1,41 @@
+# ttree.vim
+light-weight tree view for vim
+
+## API
+<dl>
+<dt><code>ttree#show([{path}])</dt>
+<dd>Open tree view. When <code>{path}</code> is given, the view's root is <code>{path}</code>.
+Otherwise, the view is opened with current directory</dd>
+
+<dt><code>ttree#hide()</dt>
+<dd>Hide tree view.</dd>
+
+<dt><code>ttree#toggle()</dt>
+<dd>Toggle show/hide tree view</dd>
+
+<dt><code>ttree#get_node({line number})</dt>
+<dd>Get node object at <code>{line number}</code>.</dd>
+</dl>
+
+## Mapping
+<dl>
+<dt><code>&lt;CR&gt;</code></dt>
+<dd>Open node.</dd>
+
+<dt><code>o</code></dt>
+<dd>Toggle open/close directory.</dd>
+
+<dt><code>I</code></dt>
+<dd>Toggle show/hide dotfiles.</dd>
+
+<dt><code>C</code></dt>
+<dd>Re-open the view with a node under the cursor.</dd>
+
+<dt><code>R</code></dt>
+<dd>Reload file nodes.</dd>
+</dl>
+
+## Todo
+* Enable to choose sorting method
+* More intelligent view splitting and closing
+* Etc...

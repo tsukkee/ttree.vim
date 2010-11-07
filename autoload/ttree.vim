@@ -1,3 +1,6 @@
+let s:cpo_save = &cpo
+set cpo&vim
+
 " Constants {{{
 function! s:define(name, value)
     let s:{a:name} = a:value
@@ -160,7 +163,8 @@ endfunction
 function! s:Ttree.show()
     " buffer is not shown
     if !self.is_shown()
-        execute self.width 'vnew' self.bufname
+        " TODO: use topleft or botright?
+        execute 'topleft' self.width 'vnew' self.bufname
         let self.bufnr = bufnr('')
 
         setlocal buftype=nofile
@@ -382,3 +386,5 @@ function! s:NodeFactory(path)
     endif
 endfunction
 " }}}
+
+let &cpo = s:cpo_save

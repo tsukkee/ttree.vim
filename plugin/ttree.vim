@@ -1,7 +1,7 @@
 let s:cpo_save = &cpo
 set cpo&vim
 
-augroup tree_view
+augroup ttree
     autocmd!
 augroup END
 
