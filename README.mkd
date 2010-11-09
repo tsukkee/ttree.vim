@@ -17,6 +17,18 @@ Otherwise, the view is opened with current directory</dd>
 <dd>Get node object at <code>{line number}</code>.</dd>
 </dl>
 
+## Commands
+<dl>
+<dt><code>:TtreeShow</code></dt>
+<dd>Show tree view</dd>
+
+<dt><code>:TtreeHide</code></dt>
+<dd>Hide tree view</dd>
+
+<dt><code>:TtreeToggle</code></dt>
+<dd>Toggle show/hide tree view</dd>
+</dl>
+
 ## Mapping
 <dl>
 <dt><code>&lt;CR&gt;</code></dt>
@@ -35,9 +47,22 @@ Otherwise, the view is opened with current directory</dd>
 <dd>Reload file nodes.</dd>
 </dl>
 
+## Options
+<dl>
+<dt><code>g:ttree_use_default_mappings</code></dt>
+<dd>Use default mappings. Default value is 1.</dd>
+
+<dt><code>g:ttree_width</code></dt>
+<dd>Width of tree view. Default value is 25.</dd>
+
+<dt><code>g:ttree_replace_netrw</code></dt>
+<dd>Replace netrw with ttree. Default value is 0.</dd>
+</dl>
+
 ## Todo
 * Enable to choose sorting method
 * Manipulate drive letters in Windows
 * More intelligent view splitting and closing
 * More actions
+* Integrate unite.vim
 * Etc...
