@@ -92,6 +92,13 @@ function! ttree#get_node(...)
     \   ? t:ttree.line2node[index]
     \   : s:EMPTY
 endfunction
+
+function! ttree#replace_netrw(path)
+    if isdirectory(a:path)
+        let s:ttree_should_not_split = 1
+        call ttree#show(a:path)
+    endif
+endfunction
 " }}}
 
 " Utility {{{
@@ -114,9 +121,11 @@ function! s:open_node(lnum)
     let node = ttree#get_node(a:lnum)
     if has_key(node, 'is_upper')
         call ttree#show(node.path)
+    elseif node.is_dir
+        call s:toggle_directory(a:lnum)
     elseif !empty(node)
         " move to last window
-        if winnr('#') != winnr()
+        if winnr('$') > 1
             wincmd p
         " when there is only ttree buffer, preserve ttree window
         else
@@ -159,12 +168,15 @@ function! s:_rec_open(node)
 endfunction
 
 function! s:recursive_open(lnum)
+    echo "ttree: open recursively, please wait ..."
+    redraw
+
     let node = ttree#get_node(a:lnum)
     if !node.is_dir
         return
     endif
 
-    call s:_rec_open(node)
+    silent call s:_rec_open(node)
     call t:ttree.render()
 endfunction
 
@@ -235,7 +247,14 @@ function! s:Ttree.show()
     " buffer is not shown
     if !self.is_shown()
         " TODO: use topleft or botright?
-        execute 'topleft' self.width 'vnew' self.bufname
+        if !exists('s:ttree_should_not_split')
+            execute 'topleft' self.width 'vnew' self.bufname
+        else
+            setlocal bufhidden=wipe
+            execute 'edit' self.bufname
+            unlet s:ttree_should_not_split
+        endif
+
         let self.bufnr = bufnr('')
 
         setlocal buftype=nofile
@@ -379,6 +398,8 @@ endfunction
 function! s:DirNode.cache(force)
     if a:force || !self.has_cached
         let children = split(glob(self.path . '{.*,*}'), "\n")
+        echo "ttree: caching" len(children) "nodes ..."
+        redraw
 
         " delete non-existent node
         let i = 0
@@ -399,6 +420,8 @@ function! s:DirNode.cache(force)
             let i += 1
         endfor
         let self.has_cached = 1
+
+        echo "ttree: done!"
     endif
 endfunction
 

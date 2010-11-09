@@ -6,6 +6,15 @@ augroup ttree
     autocmd VimEnter * call s:define_unite_action()
 augroup END
 
+if exists('g:ttree_replace_netrw') && g:ttree_replace_netrw
+    augroup ttree
+        " remove netrw
+        autocmd VimEnter * silent! autocmd! FileExplorer
+        " open ttree
+        autocmd BufEnter,VimEnter * call ttree#replace_netrw(expand('<amatch>'))
+    augroup END
+endif
+
 function! s:dirname(path)
     return isdirectory(a:path) ? a:path : fnamemodify(a:path, ':p:h')
 endfunction
