@@ -1,6 +1,6 @@
 " ttree.vim: light-weight tree view for vim
 " Version:     0.0.1
-" Last Change: 10 Nov 2010
+" Last Change: 24 Feb 2011
 " Author:      tsukkee <takayuki0510+ttree_vim at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,15 +31,15 @@ function! s:define(name, value)
     lockvar s:{a:name}
 endfunction
 
-call s:define('EXCEPTION_NAME', 'ttree: ')
-call s:define('BUFFER_NAME', 'ttree')
+call s:define('EXCEPTION_NAME',   'ttree: ')
+call s:define('BUFFER_NAME',      'ttree')
 call s:define('FILE_NODE_MARKER', '-')
-call s:define('DIR_SEPARATOR', '/')
+call s:define('DIR_SEPARATOR',    '/')
 call s:define('CLOSE_DIR_MARKER', '+')
-call s:define('OPEN_DIR_MARKER', '~')
-call s:define('UPPER', '../')
-call s:define('OFFSET', 0)
-call s:define('EMPTY', {})
+call s:define('OPEN_DIR_MARKER',  '~')
+call s:define('UPPER',            '../')
+call s:define('OFFSET',           0)
+call s:define('EMPTY',            {})
 " }}}
 
 " Customize {{{
@@ -76,7 +76,12 @@ function! ttree#show(...)
 
     " build root node
     if !resume
-        let t:ttree.root = s:NodeFactory(root_path)
+        try
+            let t:ttree.root = s:NodeFactory(root_path)
+        catch /^ttree:/
+            call s:warn('Failed to open ttree with ' . root_path)
+            return 0
+        endtry
         call t:ttree.root.open()
     endif
 
@@ -126,6 +131,13 @@ endfunction
 " }}}
 
 " Utility {{{
+" warn
+function! s:warn(message)
+    echohl WarningMsg
+    echo a:message
+    echohl None
+endfunction
+
 " create indent
 function! s:space(count)
     return repeat(' ', a:count)
@@ -439,7 +451,12 @@ function! s:DirNode.cache(force)
         let i = 0
         for path in children
             if empty(filter(copy(self.children), 'v:val.path == path'))
-                call insert(self.children, s:NodeFactory(path), i)
+                try
+                    call insert(self.children, s:NodeFactory(path), i)
+                catch /^ttree:/
+                    call s:warn(path . ' is not found')
+                    continue
+                endtry
             endif
             let i += 1
         endfor
